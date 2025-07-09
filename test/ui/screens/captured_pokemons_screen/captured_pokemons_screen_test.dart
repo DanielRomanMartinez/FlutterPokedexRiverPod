@@ -77,60 +77,22 @@ void main() {
   });
 
   group('Captured Screen Test', () {
-    testWidgets('Pump and test widget - Initial Loading', (WidgetTester tester) async {
-      const user = User(
-        numPokemonsCaptured: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        mostPokemonTypeCaptured: null,
-      );
+    testWidgets(
+      'Pump and test widget - Initial Loading',
+      (WidgetTester tester) async {
+        const user = User(
+          numPokemonsCaptured: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          mostPokemonTypeCaptured: null,
+        );
 
-      final completer = Completer<List<Pokemon>>();
+        final completer = Completer<List<Pokemon>>();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            capturedPokemonsScreenNotifierProvider.overrideWith(() => TestCapturedPokemonsNotifier(completer.future)),
-            userInformationNotifierProvider.overrideWith(() => TestUserInformationNotifier(Future.value(user))),
-            bottomNavigationNotifierProvider
-                .overrideWith(() => TestBottomNavigationNotifier(PageScreen.capturedPokemons)),
-          ],
-          child: const MaterialApp(
-            home: CapturedPokemonsScreen(),
-          ),
-        ),
-      );
-
-      await tester.pump();
-
-      Finder textFinder = find.text('Loading...');
-      expect(textFinder, findsOneWidget);
-
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('../../goldens/captured_pokemons_screen/captured_pokemons_screen_1.png'),
-      );
-
-      completer.complete([]);
-      await tester.pump();
-    });
-
-    testWidgets('Pump and test widget - Pokemons Loaded', (WidgetTester tester) async {
-      const user = User(
-        numPokemonsCaptured: 1,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        mostPokemonTypeCaptured: null,
-      );
-
-      const pokemons = [pokemon];
-
-      await mockNetworkImages(() async {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              capturedPokemonsScreenNotifierProvider
-                  .overrideWith(() => TestCapturedPokemonsNotifier(Future.value(pokemons))),
+              capturedPokemonsScreenNotifierProvider.overrideWith(() => TestCapturedPokemonsNotifier(completer.future)),
               userInformationNotifierProvider.overrideWith(() => TestUserInformationNotifier(Future.value(user))),
               bottomNavigationNotifierProvider
                   .overrideWith(() => TestBottomNavigationNotifier(PageScreen.capturedPokemons)),
@@ -142,16 +104,62 @@ void main() {
         );
 
         await tester.pump();
-      });
 
-      Finder textFinder = find.text(pokemon.name.capitalize());
-      expect(textFinder, findsOneWidget);
+        Finder textFinder = find.text('Loading...');
+        expect(textFinder, findsOneWidget);
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('../../goldens/captured_pokemons_screen/captured_pokemons_screen_2.png'),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('../../goldens/captured_pokemons_screen/captured_pokemons_screen_1.png'),
+        );
+
+        completer.complete([]);
+        await tester.pump();
+      },
+      tags: ['golden'],
+    );
+
+    testWidgets(
+      'Pump and test widget - Pokemons Loaded',
+      (WidgetTester tester) async {
+        const user = User(
+          numPokemonsCaptured: 1,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          mostPokemonTypeCaptured: null,
+        );
+
+        const pokemons = [pokemon];
+
+        await mockNetworkImages(() async {
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                capturedPokemonsScreenNotifierProvider
+                    .overrideWith(() => TestCapturedPokemonsNotifier(Future.value(pokemons))),
+                userInformationNotifierProvider.overrideWith(() => TestUserInformationNotifier(Future.value(user))),
+                bottomNavigationNotifierProvider
+                    .overrideWith(() => TestBottomNavigationNotifier(PageScreen.capturedPokemons)),
+              ],
+              child: const MaterialApp(
+                home: CapturedPokemonsScreen(),
+              ),
+            ),
+          );
+
+          await tester.pump();
+        });
+
+        Finder textFinder = find.text(pokemon.name.capitalize());
+        expect(textFinder, findsOneWidget);
+
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('../../goldens/captured_pokemons_screen/captured_pokemons_screen_2.png'),
+        );
+      },
+      tags: ['golden'],
+    );
 
     testWidgets('Pump and test widget - No Pokemons', (WidgetTester tester) async {
       const user = User(

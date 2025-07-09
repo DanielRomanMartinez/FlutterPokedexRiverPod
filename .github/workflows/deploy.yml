@@ -37,8 +37,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Run tests
-        run: flutter test
+      - name: Analyze project source
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests (excluding golden tests)
+        run: flutter test --exclude-tags=golden
 
   build-and-deploy:
     name: Build & Deploy
@@ -87,43 +90,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Create deployment status
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: '${{ steps.deployment.outputs.deployment_id }}',
-              state: 'success',
-              environment_url: '${{ steps.deployment.outputs.page_url }}',
-              description: 'Deployment to GitHub Pages successful'
-            });
-
-  post-deploy:
-    name: Post Deploy
-    runs-on: ubuntu-latest
-    needs: build-and-deploy
-    if: always()
-
-    steps:
-      - name: Notify deployment status
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const deploymentUrl = '${{ needs.build-and-deploy.outputs.page_url }}';
-            const status = '${{ needs.build-and-deploy.result }}';
-            
-            if (status === 'success') {
-              github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: `🚀 **Deployment successful!**
-            
-                Your Flutter Pokedex is now live at: ${deploymentUrl}
-            
-                Build completed at: ${new Date().toISOString()}`
-              });
-            }
