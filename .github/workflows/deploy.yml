@@ -69,8 +69,7 @@ jobs:
         run: |
           flutter build web \
             --release \
-            --base-href /FlutterPokedexRiverPod/ \
-            --web-renderer canvaskit
+            --base-href /FlutterPokedexRiverPod/
 
       - name: Add .nojekyll file
         run: touch build/web/.nojekyll
