@@ -27,28 +27,31 @@ class ApplicationLayout extends ConsumerWidget {
 
     return userAsyncValue.when(
       data: (user) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: canPop
-                ? IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: user.foregroundColor,
-                    ),
-                    onPressed: () => context.pop(),
-                  )
-                : const SizedBox.shrink(),
-            title: Text(
-              title,
-              style: TextStyle(color: user.foregroundColor),
+        return PopScope(
+          canPop: canPop,
+          child: Scaffold(
+            appBar: AppBar(
+              leading: canPop
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: user.foregroundColor,
+                      ),
+                      onPressed: () => context.pop(),
+                    )
+                  : const SizedBox.shrink(),
+              title: Text(
+                title,
+                style: TextStyle(color: user.foregroundColor),
+              ),
+              backgroundColor: user.backgroundColor,
             ),
-            backgroundColor: user.backgroundColor,
+            bottomNavigationBar: CustomBottomNavigationBar(
+              pageScreen: currentPage,
+              color: user.backgroundColor,
+            ),
+            body: child,
           ),
-          bottomNavigationBar: CustomBottomNavigationBar(
-            pageScreen: currentPage,
-            color: user.backgroundColor,
-          ),
-          body: child,
         );
       },
       loading: () => Scaffold(
